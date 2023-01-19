@@ -50,7 +50,7 @@ def pygame_bool_input():
                 if evenement.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                elif evenement.key == pygame.K_DOWN:
+                elif evenement.key == pygame.K_SPACE:
                     return True
                 elif evenement.key == pygame.K_TAB:
                     return False

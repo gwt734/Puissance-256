@@ -7,7 +7,7 @@
 
 ## Startup
 
-execute the main file using either of the commands\
+Execute the main file using either of the commands\
 ```python main.py```\
     or\
 ```python3 main.py```\
