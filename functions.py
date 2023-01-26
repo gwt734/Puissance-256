@@ -26,8 +26,11 @@ def ask_move(game: types_and_inits.game, message: str = "", warning_message: str
     print()
     print(message)
     if IS_GUI_ENABLED:
+        """
         raw_player_input = gui.str_input(
             window=window, fonts=fonts, question=str(game.players[game.current_player-1]) + ", où voulez vous jouer?", warning_message=warning_message, font_size="medium", is_show_grid=True, is_show_points=True, game=game, vertical_positions=types_and_inits.vertical_positions(0.12, 0.17, 0.22))
+    """
+        raw_player_input = gui.move_selection(window=window, fonts=fonts, game=game,warning_message=warning_message)
     else:
         raw_player_input = input(
             "Joueur : " + game.players[game.current_player-1] + "\n\tOù voulez vous jouer?\n\033[0;34m"+warning_message+"\033[0m\n    -> ")

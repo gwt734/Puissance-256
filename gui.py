@@ -149,8 +149,8 @@ def move_selection(window, fonts, game, warning_message):
         creer_boite_texte((window.get_size()[0] // 2, int(window.get_size()[1]*0.12)), question, window,
                         fonts["large"])
         creer_boite_texte((window.get_size()[0] // 2, int(window.get_size()[
-                        1]*0.17)), warning_message, window,
-                        fonts["small"], couleur_texte=constants.WARNING_COLOR)
+                        1]*0.17)), texte_a_afficher=warning_message, window=window,
+                        font=fonts["small"], couleur_texte=constants.WARNING_COLOR)
         window.fill(constants.BACKGROUND_COLOR)
         show_grid(window, fonts, game)
         show_points(window, fonts, game)
@@ -164,14 +164,9 @@ def move_selection(window, fonts, game, warning_message):
                     sys.exit()
             elif evenement.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(len(game.grid)):
-                    if (cell_offset[0]*i-distance_between_cells[0] < pygame.mouse.get_pos()[0] < cell_offset[0]*(i+1)+distance_between_cells[0] and cell_offset[1]*i-distance_between_cells[1] < pygame.mouse.get_pos()[1] < cell_offset[1]*(i+1)+distance_between_cells[1]):
-                        print(i)
-                        print((cell_offset[0]*i-distance_between_cells[0], cell_offset[1]*i-distance_between_cells[1]))
-                        print((cell_offset[0]*(i+1)+distance_between_cells[0], cell_offset[1]*(i+1)+distance_between_cells[1]))
-                        pygame.draw.circle(surface=window, color=constants.PLAYER_COLORS[i], center=(cell_offset[0]*i-distance_between_cells[0], cell_offset[1]*i-distance_between_cells[1]), radius=(8/game.grid_size.y)*(constants.CELL_RADIUS))
-                        pygame.draw.circle(surface=window, color=constants.PLAYER_COLORS[i], center=(
-                            cell_offset[0]*(i+1)+distance_between_cells[0], cell_offset[1]*(i+1)+distance_between_cells[1]), radius=(3/game.grid_size.y)*(constants.CELL_RADIUS))
+                    if (cell_offset[0]+distance_between_cells[0]*i-constants.CELL_RADIUS*(8/game.grid_size.x)/2 < pygame.mouse.get_pos()[0] < cell_offset[0]+distance_between_cells[0]*i+constants.CELL_RADIUS*(8/game.grid_size.x) and cell_offset[1]-constants.CELL_RADIUS*(8/game.grid_size.x)/2<pygame.mouse.get_pos()[1]):
                         return i+1
+        standard_elements(window, fonts)
         update(window, fonts)
 
 
