@@ -17,7 +17,12 @@ if command -v pip
 then
     if pip show pygame
     then
-        python3 main.py
+        if pip show screeninfo
+        then
+            python3 main.py
+        else
+            notify-send -u critical "You need to install screeninfo"
+        fi
     else
         notify-send -u critical "You need to install pygame"
     fi

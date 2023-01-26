@@ -24,7 +24,7 @@ def window_init():
     pygame.display.set_caption('Puissance 256')
     fonts = {"small": pygame.font.Font('freesansbold.ttf', constants.FONT_SIZE_SMALL),
                "medium": pygame.font.Font('freesansbold.ttf', constants.FONT_SIZE_MEDIUM),
-               "large": pygame.font.Font('/usr/share/fonts/opentype/malayalam/Chilanka-Regular.otf', constants.FONT_SIZE_LARGE)}  # Créer les fonts et les places dans un dictionnaire
+               "large": pygame.font.Font('freesansbold.ttf', constants.FONT_SIZE_LARGE)}  # Créer les fonts et les places dans un dictionnaire
     window.fill(constants.BACKGROUND_COLOR)
     creer_boite_texte((window.get_size()[0] // 2, window.get_size()[1] // 3),
                       "Bienvenue dans cette partie de", window,
@@ -77,7 +77,7 @@ def creer_boite_texte(position, texte_a_afficher, window, font, couleur_texte=co
         window.blit(texte, boite_texte)
 
 
-def str_input(window, fonts, question, valeur_par_default="", warning_message="", font_size="medium", is_show_grid=False, game=None, vertical_positions=types_and_inits.vertical_positions(0.40,0.50,0.60)):
+def str_input(window, fonts, question, valeur_par_default="", warning_message="", font_size="medium", is_show_grid=False, is_show_points=False, game=None, vertical_positions=types_and_inits.vertical_positions(0.40,0.50,0.60)):
     """Fonction input adaptés à l'affichage graphique"""
     saisie = str(valeur_par_default)
     valid = False
@@ -95,6 +95,8 @@ def str_input(window, fonts, question, valeur_par_default="", warning_message=""
     window.fill(constants.BACKGROUND_COLOR)
     if is_show_grid:
         show_grid(window, fonts, game)
+    if is_show_points:
+        show_points(window, fonts, game)
     update(window, fonts)
     while not valid:  # Tant que l'utilisateur n'a pas validé sa reponse on cherche parmis les événeent et même parmis les touches de l'utilisateur
         for evenement in pygame.event.get():
@@ -124,6 +126,8 @@ def str_input(window, fonts, question, valeur_par_default="", warning_message=""
                           fonts["small"],couleur_texte=constants.WHITE ,couleur_fond=constants.WARNING_COLOR)
         if is_show_grid:
             show_grid(window, fonts=fonts, game=game)
+        if is_show_points:
+            show_points(window, fonts, game)
         standard_elements(window, fonts)
         pygame.display.update()
         if time.time() - last_tick > 0.5:
@@ -131,13 +135,71 @@ def str_input(window, fonts, question, valeur_par_default="", warning_message=""
             show_curseur = not show_curseur  # Inverse la valeur
     return saisie
 
+def move_selection(window, fonts, game, warning_message):
+    question = str(game.players[game.current_player-1]
+                   ) + ", où voulez vous jouer?"
+    distance_between_cells = (
+        (8/game.grid_size.y)*(constants.CELL_PADDING[0]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[0]), (8/game.grid_size.y)*(constants.CELL_PADDING[1]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[1]))
+
+    cell_offset = (int(window.get_size()[0]*0.5)-distance_between_cells[0]*((len(game.grid[0])-1)/2), int(
+        window.get_size()[1]*0.6)-distance_between_cells[1]*((len(game.grid)-1)/2))
+
+    while True:
+        window.fill(constants.BACKGROUND_COLOR)
+        creer_boite_texte((window.get_size()[0] // 2, int(window.get_size()[1]*0.12)), question, window,
+                        fonts["large"])
+        creer_boite_texte((window.get_size()[0] // 2, int(window.get_size()[
+                        1]*0.17)), warning_message, window,
+                        fonts["small"], couleur_texte=constants.WARNING_COLOR)
+        window.fill(constants.BACKGROUND_COLOR)
+        show_grid(window, fonts, game)
+        show_points(window, fonts, game)
+        for evenement in pygame.event.get():
+            if evenement.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif evenement.type == pygame.KEYDOWN:
+                if evenement.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+            elif evenement.type == pygame.MOUSEBUTTONDOWN:
+                for i in range(len(game.grid)):
+                    if (cell_offset[0]*i-distance_between_cells[0] < pygame.mouse.get_pos()[0] < cell_offset[0]*(i+1)+distance_between_cells[0] and cell_offset[1]*i-distance_between_cells[1] < pygame.mouse.get_pos()[1] < cell_offset[1]*(i+1)+distance_between_cells[1]):
+                        print(i)
+                        print((cell_offset[0]*i-distance_between_cells[0], cell_offset[1]*i-distance_between_cells[1]))
+                        print((cell_offset[0]*(i+1)+distance_between_cells[0], cell_offset[1]*(i+1)+distance_between_cells[1]))
+                        pygame.draw.circle(surface=window, color=constants.PLAYER_COLORS[i], center=(cell_offset[0]*i-distance_between_cells[0], cell_offset[1]*i-distance_between_cells[1]), radius=(8/game.grid_size.y)*(constants.CELL_RADIUS))
+                        pygame.draw.circle(surface=window, color=constants.PLAYER_COLORS[i], center=(
+                            cell_offset[0]*(i+1)+distance_between_cells[0], cell_offset[1]*(i+1)+distance_between_cells[1]), radius=(3/game.grid_size.y)*(constants.CELL_RADIUS))
+                        return i+1
+        update(window, fonts)
+
+
+
+
 def show_grid(window, fonts, game) :
     distance_between_cells = (
-        constants.CELL_PADDING[0]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[0], constants.CELL_PADDING[1]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[1])
+        (8/game.grid_size.y)*(constants.CELL_PADDING[0]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[0]), (8/game.grid_size.y)*(constants.CELL_PADDING[1]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[1]))
     cell_offset = (int(window.get_size()[0]*0.5)-distance_between_cells[0]*((len(game.grid[0])-1)/2), int(window.get_size()[1]*0.6)-distance_between_cells[1]*((len(game.grid)-1)/2))
     for y_index in range(len(game.grid)) :
         for x_index in range(len(game.grid[y_index])) :
-            pygame.draw.circle(surface=window, color=constants.PLAYER_COLORS[game.grid[y_index][x_index]], center=(cell_offset[0]+x_index*distance_between_cells[0], cell_offset[1] + y_index*distance_between_cells[1]), radius = constants.CELL_RADIUS)
+            cell_center = cell_offset[0]+x_index * \
+                distance_between_cells[0], cell_offset[1] + \
+                y_index*distance_between_cells[1]
+            pygame.draw.circle(surface=window, color=constants.PLAYER_COLORS[game.grid[y_index][x_index]], center=(
+                cell_center), radius=(8/game.grid_size.y)*(constants.CELL_RADIUS))
+            if (cell_center) in game.cells_on_winning_horizontal :
+                print(cell_center)
+                creer_boite_texte((cell_offset[0]+x_index*distance_between_cells[0],
+                              cell_offset[1] + y_index*distance_between_cells[1]), "-")
+
+
+def show_points(window, fonts, game):
+    points = functions.count_points(game)
+    for i in range(len(points)):
+        creer_boite_texte((window.get_size()[0]*0.85, window.get_size()[1]*(0.2+0.07*i)), game.players[i] + " a " + str(
+            points[i]) + " points.", window=window, font=fonts["medium"])
+
 
 def creer_boites_texte_scores(window, fonts, scores, encore, kopecs, j=-1, mises=None):
     """Créer les boites de texte qui permettent l"affichage des scores"""

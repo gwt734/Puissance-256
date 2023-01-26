@@ -27,7 +27,7 @@ def ask_move(game: types_and_inits.game, message: str = "", warning_message: str
     print(message)
     if IS_GUI_ENABLED:
         raw_player_input = gui.str_input(
-            window=window, fonts=fonts, question=str(game.players[game.current_player-1]) + ", où voulez vous jouer?", warning_message=warning_message, font_size="medium", is_show_grid=True, game=game, vertical_positions=types_and_inits.vertical_positions(0.12, 0.17, 0.22))
+            window=window, fonts=fonts, question=str(game.players[game.current_player-1]) + ", où voulez vous jouer?", warning_message=warning_message, font_size="medium", is_show_grid=True, is_show_points=True, game=game, vertical_positions=types_and_inits.vertical_positions(0.12, 0.17, 0.22))
     else:
         raw_player_input = input(
             "Joueur : " + game.players[game.current_player-1] + "\n\tOù voulez vous jouer?\n\033[0;34m"+warning_message+"\033[0m\n    -> ")
@@ -40,7 +40,8 @@ def ask_move(game: types_and_inits.game, message: str = "", warning_message: str
             player_input = ask_move(
                 window=window, fonts=fonts, game=game, message="", warning_message="Colonne pleine")
     except:
-        player_input = ask_move(window = window, fonts=fonts ,game = game, message = "", warning_message="mauvais type")
+        player_input = ask_move(
+            window=window, fonts=fonts, game=game, message="", warning_message="mauvais type")
 
     return player_input
 
@@ -91,7 +92,7 @@ def play_game(game, window=None, fonts=None):
     show_points(points)
 
 
-def is_block_complete(game: types_and_inits.game, start_position: types_and_inits.position, end_position: types_and_inits.position, player: int):
+def is_block_complete(game: types_and_inits.game, start_position: types_and_inits.position, end_position: types_and_inits.position, player: int, cells):
     positions = []
     is_complete = True
     try:
@@ -108,22 +109,29 @@ def is_block_complete(game: types_and_inits.game, start_position: types_and_init
         pass
 
     #show_currently_checked(game, positions)
+    if is_complete:
+        for cell in positions:
+            cells.append(cell)
     return is_complete
 
 
 def count_player_points(game: types_and_inits.game, player: int):
     player_points = 0
     grid = game.grid
+    cells_on_winning_horizontal = []
+    cells_on_winning_vertical = []
+    cells_on_winning_diagonal_top = []
+    cells_on_winning_diagonal_bottom = []
     # lignes
     for row_index in range(game.grid_size.y):
         for block_index in range(game.grid_size.x - game.winning_size + 1):
-            if is_block_complete(game, types_and_inits.position(block_index, row_index), types_and_inits.position(block_index + game.winning_size, row_index), player):
+            if is_block_complete(game, types_and_inits.position(block_index, row_index), types_and_inits.position(block_index + game.winning_size, row_index), player, cells=cells_on_winning_horizontal):
                 player_points += 1
 
     # colonne
     for column_index in range(game.grid_size.y):
         for block_index in range(game.grid_size.y - game.winning_size + 1):
-            if is_block_complete(game, types_and_inits.position(column_index, block_index), types_and_inits.position(column_index, block_index + game.winning_size), player):
+            if is_block_complete(game, types_and_inits.position(column_index, block_index), types_and_inits.position(column_index, block_index + game.winning_size), player, cells=cells_on_winning_vertical):
                 player_points += 1
 
     # diagonales haut bas
@@ -132,7 +140,7 @@ def count_player_points(game: types_and_inits.game, player: int):
             row_index = index + diagonal_index
             column_index = index
             #prin|t("\t: ", index)
-            if is_block_complete(game, types_and_inits.position(column_index, row_index), types_and_inits.position(column_index + game.winning_size, row_index + game.winning_size), player):
+            if is_block_complete(game, types_and_inits.position(column_index, row_index), types_and_inits.position(column_index + game.winning_size, row_index + game.winning_size), player, cells=cells_on_winning_diagonal_top):
                 player_points += 1
                 # print("+1")
             # print("\n")
@@ -142,7 +150,7 @@ def count_player_points(game: types_and_inits.game, player: int):
             row_index = index
             column_index = index + diagonal_index
             #print("\t: ", index)
-            if is_block_complete(game, types_and_inits.position(column_index, row_index), types_and_inits.position(column_index + game.winning_size, row_index + game.winning_size), player):
+            if is_block_complete(game, types_and_inits.position(column_index, row_index), types_and_inits.position(column_index + game.winning_size, row_index + game.winning_size), player, cells=cells_on_winning_diagonal_top):
                 player_points += 1
                 # print("+1")
             # print("\n")
@@ -152,16 +160,19 @@ def count_player_points(game: types_and_inits.game, player: int):
         for index in range(diagonal_index - game.winning_size + 1 + 1):
             row_index = index
             column_index = diagonal_index - index
-            if is_block_complete(game, types_and_inits.position(column_index, row_index), types_and_inits.position(column_index - game.winning_size, row_index + game.winning_size), player):
+            if is_block_complete(game, types_and_inits.position(column_index, row_index), types_and_inits.position(column_index - game.winning_size, row_index + game.winning_size), player, cells=cells_on_winning_diagonal_bottom):
                 player_points += 1
 
     for diagonal_index in range(1, game.grid_size.y - game.winning_size + 1):
         for index in range(game.winning_size - 2 - diagonal_index):
             row_index = diagonal_index
             column_index = game.grid_size.x - index - 1
-            if is_block_complete(game, types_and_inits.position(column_index, row_index), types_and_inits.position(column_index - game.winning_size, row_index + game.winning_size), player):
+            if is_block_complete(game, types_and_inits.position(column_index, row_index), types_and_inits.position(column_index - game.winning_size, row_index + game.winning_size), player, cells=cells_on_winning_diagonal_bottom):
                 player_points += 1
-
+    game.cells_on_winning_horizontal = cells_on_winning_horizontal
+    game.cells_on_winning_vertical = cells_on_winning_vertical
+    game.cells_on_winning_diagonal_top = cells_on_winning_diagonal_top
+    game.cells_on_winning_diagonal_bottom = cells_on_winning_diagonal_bottom
     return player_points
 
 
@@ -276,13 +287,13 @@ def is_replay_asked(window, fonts, game):
     points = count_points(game)
     for i in range(len(points)):
         gui.creer_boite_texte((window.get_size()[0] // 2, int(window.get_size()[1]*(0.2+0.075*(i+1)))),
-                              "Le joueur "+ str(i+1) +
+                              "Le joueur " + str(i+1) +
                               " a " + str(points[i]) + " points", window,
-                      fonts["medium"])
+                              fonts["medium"])
     gui.creer_boite_texte((window.get_size()[0] // 2, int(window.get_size()[1]*0.2)), "SCORES :", window,
-                      fonts["large"], couleur_texte=YELLOW)
+                          fonts["large"], couleur_texte=YELLOW)
     gui.creer_boite_texte((window.get_size()[0] // 2, 4 * window.get_size()[1] // 5),
-                      "* Appuyez sur ESPACE pour rejouer ou TAB pour arreter *", window,
-                      fonts["small"], couleur_texte=GREY)
+                          "* Appuyez sur ESPACE pour rejouer ou TAB pour arreter *", window,
+                          fonts["small"], couleur_texte=GREY)
     gui.update(window, fonts)
     return gui.pygame_bool_input()

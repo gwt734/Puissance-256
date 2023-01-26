@@ -26,6 +26,10 @@ class game :
     grid_size = position(DEFAULT_GRID_SIZE[0],DEFAULT_GRID_SIZE[1])
     winning_size = DEFALUT_WINNING_SIZE
     grid = []
+    cells_on_winning_horizontal = []
+    cells_on_winning_vertical = []
+    cells_on_winning_diagonal_top = []
+    cells_on_winning_diagonal_bottom = []
 
 class vertical_positions :
     def __init__(self, question_position, warning_position, input_position):
