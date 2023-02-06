@@ -253,7 +253,7 @@ def input_protege(question, answer_type=str, range_or_list="none", valid_answers
                               str(valid_answers_interval[1]-1), ". Merci de saisir une valeur comprise dans cet intervalle")
                         saisie = input(DEFAULT_QUESTION_TOKEN)
             elif range_or_list == "list":
-                if saisie_modifie in valid_answers_list:
+                if (answer_type == str and saisie_modifie.capitalize() in valid_answers_list) or saisie_modifie in valid_answers_list:
                     valeur_verifie = True
                 else:
 
@@ -277,7 +277,7 @@ def init_joueurs(n, window, fonts):
     for i in range(n):  # Pour chaque joueur on demande à l'utilisateur le nom
         nom_raw = input_protege(
             "Quel est le nom du joueur " + str(i+1)+" ?", window=window, fonts=fonts, default_answer="joueur_" + str(i+1))
-        nom = nom_raw.upper()
+        nom = nom_raw.capitalize()
         while nom in joueurs:  # contrôle pour ne pas avoir 2 fois le même nom
             nom = input_protege(
                 "Quel est le nom du joueur " + str(i+1)+" ?", window=window, fonts=fonts, default_answer=nom_raw, warning_message="Ce nom est déjà utilisé, merci d'en entrer un autre!").upper()
@@ -290,9 +290,10 @@ def is_replay_asked(window, fonts, game):
     points = count_points(game)
     for i in range(len(points)):
         gui.creer_boite_texte((window.get_size()[0] // 2, int(window.get_size()[1]*(0.2+0.075*(i+1)))),
-                              "Le joueur " + str(i+1) +
+                              game.players[i] +
                               " a " + str(points[i]) + " points", window,
                               fonts["medium"])
+        gui.show_grid(window, fonts, game, size=0.5);
     gui.creer_boite_texte((window.get_size()[0] // 2, int(window.get_size()[1]*0.2)), "SCORES :", window,
                           fonts["large"], couleur_texte=YELLOW)
     gui.creer_boite_texte((window.get_size()[0] // 2, 4 * window.get_size()[1] // 5),

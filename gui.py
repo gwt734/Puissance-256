@@ -164,7 +164,7 @@ def move_selection(window, fonts, game, warning_message):
                     sys.exit()
             elif evenement.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(len(game.grid)):
-                    if (cell_offset[0]+distance_between_cells[0]*i-constants.CELL_RADIUS*(8/game.grid_size.x)/2 < pygame.mouse.get_pos()[0] < cell_offset[0]+distance_between_cells[0]*i+constants.CELL_RADIUS*(8/game.grid_size.x) and cell_offset[1]-constants.CELL_RADIUS*(8/game.grid_size.x)/2<pygame.mouse.get_pos()[1]):
+                    if (cell_offset[0]+distance_between_cells[0]*i-constants.CELL_RADIUS*(8/game.grid_size.x) < pygame.mouse.get_pos()[0] < cell_offset[0]+distance_between_cells[0]*i+constants.CELL_RADIUS*(8/game.grid_size.x) and cell_offset[1]-constants.CELL_RADIUS*(8/game.grid_size.x)<pygame.mouse.get_pos()[1]):
                         return i+1
         standard_elements(window, fonts)
         update(window, fonts)
@@ -172,9 +172,9 @@ def move_selection(window, fonts, game, warning_message):
 
 
 
-def show_grid(window, fonts, game) :
+def show_grid(window, fonts, game, size = 1) :
     distance_between_cells = (
-        (8/game.grid_size.y)*(constants.CELL_PADDING[0]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[0]), (8/game.grid_size.y)*(constants.CELL_PADDING[1]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[1]))
+        (size*8/game.grid_size.y)*(constants.CELL_PADDING[0]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[0]), (size*8/game.grid_size.y)*(constants.CELL_PADDING[1]+2*constants.CELL_RADIUS+constants.CELL_OFFSET[1]))
     cell_offset = (int(window.get_size()[0]*0.5)-distance_between_cells[0]*((len(game.grid[0])-1)/2), int(window.get_size()[1]*0.6)-distance_between_cells[1]*((len(game.grid)-1)/2))
     for y_index in range(len(game.grid)) :
         for x_index in range(len(game.grid[y_index])) :
@@ -182,7 +182,7 @@ def show_grid(window, fonts, game) :
                 distance_between_cells[0], cell_offset[1] + \
                 y_index*distance_between_cells[1]
             pygame.draw.circle(surface=window, color=constants.PLAYER_COLORS[game.grid[y_index][x_index]], center=(
-                cell_center), radius=(8/game.grid_size.y)*(constants.CELL_RADIUS))
+                cell_center), radius=(size*8/game.grid_size.y)*(constants.CELL_RADIUS))
             if (cell_center) in game.cells_on_winning_horizontal :
                 print(cell_center)
                 creer_boite_texte((cell_offset[0]+x_index*distance_between_cells[0],
